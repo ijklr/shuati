@@ -6,18 +6,18 @@ with open('input.txt', 'r') as inputfile:
 	num_cols = int(inputfile.readline().strip())
 	board = [item.strip().split(' ') for item in inputfile.readlines()]
 
-def should_append(ii, jj):
-    return ii >= 0 and jj >= 0 and ii < num_rows and jj < num_cols and board[ii][jj].isdigit()
+def should_append(i, j):
+    return i >= 0 and j >= 0 and i < num_rows and j < num_cols and board[i][j].isdigit()
     
 def get_paths(i, j, comb):
-    return [board[i+mov[0]][j+mov[1]] for mov in comb if should_append(i+mov[0], j+mov[1])]
+    return [int(board[i+mov[0]][j+mov[1]]) for mov in comb if should_append(i+mov[0], j+mov[1])]
 
 def get_comb(piece): 
     if piece == "knight":
        return [(1, 2), (1, -2), (-1, 2), (-1, -2), (2, 1), (2, -1), (-2, 1), (-2, -1)]
     elif piece == "bishop":
 	comb = []
-	for r in range(1, min(int(num_rows), int(num_cols))):
+	for r in range(1, min(num_rows, num_cols)):
 	    comb += [(r, r), (r, -r), (-r, r), (-r, -r)]
 	return comb
     else:
@@ -33,13 +33,15 @@ for i in range(len(board)):
 
 print "piece={}, mapping={}".format(piece, mapping) 
 
-dp = [[0 for col in range(10)] for row in range(steps)]
+dp = [[0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0]]
 for x in initial:
     dp[0][x] = 1
 for i in range(1, steps):
+    idx = i%2
+    prev_idx = (i-1)%2
     for j in range(0, 10):
-	if dp[i-1][j] > 0:
-	    dp[i][j] = len(mapping[j]) * dp[i-1][j]
+	for nb in mapping[j]:
+	    if dp[prev_idx][nb] > 0:
+		dp[idx][j] += dp[prev_idx][nb]
 
-print "dp={}".format(dp)
-print "total number of paths={}".format(sum(dp[-1]))
+print "total number of paths={}".format(sum(dp[idx]))
